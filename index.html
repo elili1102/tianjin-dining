@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
 <title>天津高端餐饮指南 · 可视化看板</title>
 <script>
 var CDN_LIST=[
@@ -56,7 +56,8 @@ body{font-family:'Microsoft YaHei',sans-serif;background:var(--bg);color:var(--t
 .table-controls input,.table-controls select{background:#fff;border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:13px;outline:none;font-family:'Microsoft YaHei';transition:border-color .2s}
 .table-controls input:focus,.table-controls select:focus{border-color:var(--gold)}
 .table-controls input{width:200px;flex:1;min-width:140px}
-.btn-export{background:linear-gradient(135deg,#c8a44e,#a8872e);color:#fff;border:none;border-radius:8px;padding:8px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Microsoft YaHei';box-shadow:0 2px 8px rgba(168,135,46,0.25);white-space:nowrap}
+.btn-export,.btn-share{background:linear-gradient(135deg,#c8a44e,#a8872e);color:#fff;border:none;border-radius:8px;padding:8px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Microsoft YaHei';box-shadow:0 2px 8px rgba(168,135,46,0.25);white-space:nowrap;transition:transform .15s,box-shadow .15s}
+.btn-export:active,.btn-share:active{transform:scale(0.96);box-shadow:0 1px 4px rgba(168,135,46,0.15)}
 
 table{width:100%;border-collapse:collapse;font-size:13px}
 thead th{background:linear-gradient(180deg,#f8f5f0,#f0ebe3);color:#5a4a3a;padding:11px 12px;text-align:left;font-weight:600;position:sticky;top:0;z-index:2;white-space:nowrap;border-bottom:2px solid rgba(200,164,78,0.3)}
@@ -64,7 +65,12 @@ tbody tr{border-bottom:1px solid #eee8e0;transition:background .15s}
 tbody tr:hover{background:var(--hover)}
 tbody tr:nth-child(even){background:#fcfaf6}
 tbody tr:nth-child(even):hover{background:var(--hover)}
+tbody tr.highlight{background:#fff8e1!important;animation:hlFade 2s ease-out}
+@keyframes hlFade{0%{background:#ffe082}100%{background:#fff8e1}}
 tbody td{padding:10px 12px;color:var(--text2);white-space:nowrap}
+
+.share-btn{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;border:1px solid #e0d8ce;background:#fff;color:#8a8078;cursor:pointer;font-size:16px;transition:all .2s;-webkit-tap-highlight-color:transparent}
+.share-btn:hover,.share-btn:active{background:linear-gradient(135deg,#c8a44e,#a8872e);color:#fff;border-color:transparent;transform:scale(1.1)}
 
 .rank-badge{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;font-size:12px;font-weight:700}
 .rank-1{background:linear-gradient(135deg,#FFD700,#FFA500);color:#fff;box-shadow:0 2px 6px rgba(255,165,0,0.3)}
@@ -96,20 +102,99 @@ tbody td{padding:10px 12px;color:var(--text2);white-space:nowrap}
 .table-scroll::-webkit-scrollbar-track{background:#f7f4ee}
 .table-scroll::-webkit-scrollbar-thumb{background:#d0c8bc;border-radius:3px}
 
-/* Mobile table: horizontal scroll */
 @media(max-width:768px){
   .table-scroll{overflow-x:auto;max-height:none}
-  table{min-width:860px}
+  table{min-width:920px}
   .dish-list{max-width:140px}
 }
 
 .footer{text-align:center;padding:22px;font-size:12px;color:var(--text3);border-top:1px solid #e8e0d4;background:#faf7f2}
 
-/* Smooth chart resize */
 .chart-box canvas{border-radius:8px}
+
+/* ===== 分享弹窗 ===== */
+.share-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;animation:fadeIn .2s}
+.share-overlay.show{display:flex}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.share-modal{background:#fff;border-radius:16px;width:90%;max-width:420px;padding:0;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.2);animation:slideUp .3s ease}
+@keyframes slideUp{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
+.share-modal-header{background:linear-gradient(135deg,#1a1a2e,#3d2b56);padding:20px 24px;color:#f0e6d3;position:relative}
+.share-modal-header .close{position:absolute;top:12px;right:16px;width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,0.15);border:none;color:#f0e6d3;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s}
+.share-modal-header .close:active{background:rgba(255,255,255,0.3)}
+.share-modal-header h3{font-size:17px;font-weight:700;margin-bottom:4px}
+.share-modal-header .r-name{font-size:14px;opacity:0.85;display:flex;align-items:center;gap:6px}
+.share-modal-body{padding:20px 24px}
+.share-url-box{display:flex;gap:8px;margin-bottom:16px}
+.share-url-box input{flex:1;padding:10px 12px;border:1px solid #e0d8ce;border-radius:8px;font-size:13px;color:#4a4038;background:#faf7f2;outline:none;font-family:monospace;word-break:break-all}
+.share-url-box input:focus{border-color:var(--gold)}
+.share-actions{display:flex;gap:10px;flex-wrap:wrap}
+.share-action{flex:1;min-width:80px;display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px 10px;border-radius:12px;border:1px solid #e0d8ce;background:#fff;cursor:pointer;transition:all .2s;font-size:12px;color:#4a4038;-webkit-tap-highlight-color:transparent}
+.share-action:active{background:#f8f5f0;border-color:var(--gold);transform:scale(0.97)}
+.share-action .icon{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px}
+.share-action.copy .icon{background:#eff6ff;color:#2563eb}
+.share-action.wx .icon{background:#f0fdf4;color:#16a34a}
+.share-action.browser .icon{background:#fffbeb;color:#d97706}
+.share-action .label{font-size:11px;font-weight:500}
+.copied-tip{text-align:center;color:#16a34a;font-size:13px;margin-top:12px;display:none;font-weight:500}
+.copied-tip.show{display:block}
+.wx-guide{background:#f0fdf4;border-radius:10px;padding:14px 16px;margin-top:14px;font-size:12px;color:#166534;line-height:1.7;display:none}
+.wx-guide.show{display:block}
+.wx-guide .steps{list-style:none;padding:0;margin:8px 0 0}
+.wx-guide .steps li{padding:3px 0;padding-left:18px;position:relative}
+.wx-guide .steps li::before{content:'•';position:absolute;left:4px;color:#16a34a}
+.social-row{display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.social-btn{flex:1;min-width:60px;padding:10px 8px;border-radius:8px;border:1px solid #e0d8ce;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;font-size:12px;color:#4a4038;transition:all .15s;-webkit-tap-highlight-color:transparent}
+.social-btn:active{background:#f8f5f0}
+.social-btn .s-icon{font-size:18px}
 </style>
 </head>
 <body>
+
+<div class="share-overlay" id="shareOverlay">
+  <div class="share-modal">
+    <div class="share-modal-header">
+      <button class="close" onclick="closeShare()">✕</button>
+      <h3>📤 分享餐厅</h3>
+      <div class="r-name" id="shareRName"></div>
+    </div>
+    <div class="share-modal-body">
+      <div class="share-url-box">
+        <input type="text" id="shareUrlInput" readonly value="" onclick="this.select()">
+      </div>
+      <div class="social-row">
+        <button class="social-btn" onclick="shareToWechat()" style="background:#f0fdf4;border-color:#16a34a;color:#166534;font-weight:600">
+          <span class="s-icon">💚</span> 微信
+        </button>
+        <button class="social-btn" onclick="shareOpenBrowser()" style="background:#fffbeb;border-color:#d97706;color:#92400e;font-weight:600">
+          <span class="s-icon">🌐</span> 浏览器打开
+        </button>
+      </div>
+      <div class="share-actions">
+        <button class="share-action copy" onclick="copyShareLink()">
+          <div class="icon">📋</div>
+          <div class="label">复制链接</div>
+        </button>
+        <button class="share-action" onclick="shareSystem()">
+          <div class="icon" style="background:#f5f3ff;color:#7c3aed">📲</div>
+          <div class="label">系统分享</div>
+        </button>
+        <button class="share-action" onclick="shareSMS()">
+          <div class="icon" style="background:#fdf2f8;color:#db2777">💬</div>
+          <div class="label">短信分享</div>
+        </button>
+      </div>
+      <div class="copied-tip" id="copiedTip">✅ 链接已复制，可直接粘贴发送</div>
+      <div class="wx-guide" id="wxGuide">
+        <strong>💡 微信分享说明：</strong>
+        <ul class="steps">
+          <li>点击上方「复制链接」按钮</li>
+          <li>打开微信，粘贴链接发送给好友/群聊</li>
+          <li>好友点击链接后，选择"在浏览器中打开"</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
 
 <div class="header">
   <h1>🦐 天津高端餐饮指南 · 可视化看板</h1>
@@ -124,12 +209,13 @@ tbody td{padding:10px 12px;color:var(--text2);white-space:nowrap}
     <input type="text" id="searchInput" placeholder="🔍 搜索餐厅 / 菜系 / 区域" oninput="filterTable()">
     <select id="areaFilter" onchange="filterTable()"><option value="">全部区域</option></select>
     <select id="cuisineFilter" onchange="filterTable()"><option value="">全部菜系</option></select>
+    <button class="btn-share" onclick="shareAll()">📤 分享看板</button>
     <button class="btn-export" onclick="exportExcel()">📥 导出</button>
   </div>
   <div class="table-scroll">
     <table>
       <thead><tr>
-        <th>排名</th><th>餐厅名称</th><th>行政区域</th><th>菜系类型</th><th>综合评分</th><th>人均消费</th><th>详细地址</th><th>推荐菜品</th>
+        <th>排名</th><th>餐厅名称</th><th>行政区域</th><th>菜系类型</th><th>综合评分</th><th>人均消费</th><th>详细地址</th><th>推荐菜品</th><th>分享</th>
       </tr></thead>
       <tbody id="tableBody"></tbody>
     </table>
@@ -191,6 +277,142 @@ const DATA=[
 ];
 
 DATA.sort((a,b)=>b.score-a.score||b.price-a.price);
+var currentShareR=null;
+
+// 分享功能
+function getShareUrl(r){
+  var base=location.href.split('#')[0].split('?')[0];
+  return base+'#r='+encodeURIComponent(r.name);
+}
+
+function shareRestaurant(r,ev){
+  if(ev){ev.stopPropagation();}
+  currentShareR=r;
+  document.getElementById('shareRName').textContent=r.name+' · '+r.area+' · ¥'+r.price;
+  var url=getShareUrl(r);
+  document.getElementById('shareUrlInput').value=url;
+  document.getElementById('shareOverlay').classList.add('show');
+  document.getElementById('copiedTip').classList.remove('show');
+  document.getElementById('wxGuide').classList.remove('show');
+}
+
+function shareAll(){
+  currentShareR=null;
+  var base=location.href.split('#')[0].split('?')[0];
+  document.getElementById('shareRName').textContent='天津高端餐饮指南 · 30家甄选餐厅';
+  document.getElementById('shareUrlInput').value=base;
+  document.getElementById('shareOverlay').classList.add('show');
+  document.getElementById('copiedTip').classList.remove('show');
+  document.getElementById('wxGuide').classList.remove('show');
+}
+
+function closeShare(){
+  document.getElementById('shareOverlay').classList.remove('show');
+}
+
+document.getElementById('shareOverlay').addEventListener('click',function(e){
+  if(e.target===this)closeShare();
+});
+
+function copyShareLink(){
+  var input=document.getElementById('shareUrlInput');
+  var url=input.value;
+  var copied=false;
+
+  // 方案1: navigator.clipboard (需HTTPS或localhost)
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(url).then(function(){
+      showCopied();
+    }).catch(function(){
+      fallbackCopy(url);
+    });
+    return;
+  }
+  fallbackCopy(url);
+}
+
+function fallbackCopy(text){
+  var ta=document.createElement('textarea');
+  ta.value=text;
+  ta.style.position='fixed';
+  ta.style.left='-9999px';
+  ta.style.top='-9999px';
+  ta.style.opacity='0';
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+  try{
+    document.execCommand('copy');
+    showCopied();
+  }catch(e){
+    // 微信内置浏览器兜底：让用户长按手动复制
+    var input=document.getElementById('shareUrlInput');
+    input.select();
+    input.focus();
+    document.getElementById('wxGuide').classList.add('show');
+  }
+  document.body.removeChild(ta);
+}
+
+function showCopied(){
+  var tip=document.getElementById('copiedTip');
+  tip.classList.add('show');
+  // 微信提示
+  if(isWechat()){
+    document.getElementById('wxGuide').classList.add('show');
+  }
+}
+
+function shareToWechat(){
+  // 微信内：提示复制链接后粘贴到微信
+  if(isWechat()){
+    copyShareLink();
+    document.getElementById('wxGuide').classList.add('show');
+    return;
+  }
+  // 非微信环境：尝试复制链接
+  copyShareLink();
+}
+
+function shareOpenBrowser(){
+  var url=document.getElementById('shareUrlInput').value;
+  // 微信内置浏览器：提示在浏览器中打开
+  if(isWechat()){
+    document.getElementById('wxGuide').classList.add('show');
+    var guide=document.getElementById('wxGuide');
+    guide.innerHTML='<strong>🌐 在浏览器中打开：</strong><ul class="steps"><li>点击右上角 <strong>···</strong> 菜单</li><li>选择 <strong>"在浏览器中打开"</strong></li><li>在浏览器中查看完整看板</li></ul><p style="margin-top:6px;color:#92400e">或复制链接后，在手机浏览器粘贴打开</p>';
+    guide.classList.add('show');
+    // 同时提示用户复制链接
+    var input=document.getElementById('shareUrlInput');
+    input.select();
+    input.focus();
+    return;
+  }
+  window.open(url,'_blank');
+}
+
+function shareSystem(){
+  var url=document.getElementById('shareUrlInput').value;
+  var title=currentShareR?currentShareR.name:'天津高端餐饮指南';
+  if(navigator.share){
+    navigator.share({title:title,text:'天津高端餐饮推荐：'+title,url:url}).catch(function(){});
+  }else{
+    // 兜底：复制链接
+    copyShareLink();
+  }
+}
+
+function shareSMS(){
+  var url=document.getElementById('shareUrlInput').value;
+  var title=currentShareR?currentShareR.name:'天津高端餐饮指南';
+  var body='推荐一家天津高端餐厅：'+title+' - '+url;
+  // iOS/Android 通用短信链接
+  location.href='sms:?body='+encodeURIComponent(body);
+}
+
+function isWechat(){
+  return /micromessenger/i.test(navigator.userAgent);
+}
 
 // KPI
 const avgScore=(DATA.reduce((s,d)=>s+d.score,0)/DATA.length).toFixed(2);
@@ -201,22 +423,15 @@ const areas=[...new Set(DATA.map(d=>d.area))].length;
 const cuisines=[...new Set(DATA.map(d=>d.cuisine))].length;
 const blackPearl=DATA.filter(d=>d.star&&d.star.includes('黑珍珠')).length;
 
-document.getElementById('kpiRow').innerHTML=`
-<div class="kpi-card"><div class="label">甄选餐厅总数</div><div class="value">${DATA.length}<span class="unit">家</span></div></div>
-<div class="kpi-card"><div class="label">平均综合评分</div><div class="value">${avgScore}<span class="unit">分</span></div></div>
-<div class="kpi-card"><div class="label">人均消费区间</div><div class="value">¥${minPrice}<span class="unit">~¥${maxPrice}</span></div></div>
-<div class="kpi-card"><div class="label">4.8分+优质餐厅</div><div class="value">${highScore}<span class="unit">家</span></div></div>
-<div class="kpi-card"><div class="label">覆盖行政区域</div><div class="value">${areas}<span class="unit">个</span></div></div>
-<div class="kpi-card"><div class="label">菜系类型</div><div class="value">${cuisines}<span class="unit">种</span></div></div>
-<div class="kpi-card"><div class="label">黑珍珠上榜</div><div class="value">${blackPearl}<span class="unit">家</span></div></div>`;
+document.getElementById('kpiRow').innerHTML='<div class="kpi-card"><div class="label">精选餐厅总数</div><div class="value">'+DATA.length+'<span class="unit">家</span></div></div><div class="kpi-card"><div class="label">平均综合评分</div><div class="value">'+avgScore+'<span class="unit">分</span></div></div><div class="kpi-card"><div class="label">人均消费区间</div><div class="value">¥'+minPrice+'<span class="unit">~¥'+maxPrice+'</span></div></div><div class="kpi-card"><div class="label">4.8分+优质餐厅</div><div class="value">'+highScore+'<span class="unit">家</span></div></div><div class="kpi-card"><div class="label">覆盖行政区域</div><div class="value">'+areas+'<span class="unit">个</span></div></div><div class="kpi-card"><div class="label">菜系类型</div><div class="value">'+cuisines+'<span class="unit">种</span></div></div><div class="kpi-card"><div class="label">黑珍珠上榜</div><div class="value">'+blackPearl+'<span class="unit">家</span></div></div>';
 
 // TABLE
 const tagMap={'粤菜':'tag-cantonese','潮粤菜':'tag-cantonese','日料':'tag-japanese','法餐':'tag-french','清真':'tag-halal','津菜':'tag-tianjin','海鲜':'tag-seafood','西餐':'tag-western','自助餐':'tag-buffet','京菜':'tag-beijing','融合菜':'tag-fusion','潮州菜':'tag-cantonese','淮扬菜':'tag-fusion','本帮菜':'tag-cantonese'};
 
 function renderTable(data){
-  document.getElementById('tableBody').innerHTML=data.map((d,i)=>{
-    const r=i+1,rc=r<=3?'rank-'+r:'rank-n',sc=d.score>=4.8?'score-high':d.score>=4.5?'score-mid':'score-low',tc=tagMap[d.cuisine]||'tag-fusion';
-    return`<tr><td><span class="rank-badge ${rc}">${r}</span></td><td style="font-weight:600;color:#2d1f3d">${d.name}</td><td>${d.area}</td><td><span class="tag ${tc}">${d.cuisine}</span></td><td class="${sc}">${d.score}</td><td style="color:#8b6914;font-weight:600">¥${d.price}</td><td style="white-space:normal;max-width:220px;color:#6a6058">${d.address}</td><td class="dish-list" title="${d.dishes}">${d.dishes}</td></tr>`;
+  document.getElementById('tableBody').innerHTML=data.map(function(d,i){
+    var r=i+1,rc=r<=3?'rank-'+r:'rank-n',sc=d.score>=4.8?'score-high':d.score>=4.5?'score-mid':'score-low',tc=tagMap[d.cuisine]||'tag-fusion';
+    return '<tr id="row-'+i+'"><td><span class="rank-badge '+rc+'">'+r+'</span></td><td style="font-weight:600;color:#2d1f3d">'+d.name+'</td><td>'+d.area+'</td><td><span class="tag '+tc+'">'+d.cuisine+'</span></td><td class="'+sc+'">'+d.score+'</td><td style="color:#8b6914;font-weight:600">¥'+d.price+'</td><td style="white-space:normal;max-width:220px;color:#6a6058">'+d.address+'</td><td class="dish-list" title="'+d.dishes+'">'+d.dishes+'</td><td><button class="share-btn" onclick="shareRestaurant(DATA['+i+'],event)" title="分享此餐厅">📤</button></td></tr>';
   }).join('');
 }
 renderTable(DATA);
@@ -227,123 +442,140 @@ document.getElementById('areaFilter').innerHTML='<option value="">全部区域</
 document.getElementById('cuisineFilter').innerHTML='<option value="">全部菜系</option>'+cuisineSet.map(c=>'<option>'+c+'</option>').join('');
 
 function filterTable(){
-  const kw=document.getElementById('searchInput').value.toLowerCase();
-  const af=document.getElementById('areaFilter').value;
-  const cf=document.getElementById('cuisineFilter').value;
-  renderTable(DATA.filter(d=>!(af&&d.area!==af)&&!(cf&&d.cuisine!==cf)&&!(kw&&!(d.name.toLowerCase().includes(kw)||d.cuisine.includes(kw)||d.area.includes(kw)||d.dishes.includes(kw)))));
+  var kw=document.getElementById('searchInput').value.toLowerCase();
+  var af=document.getElementById('areaFilter').value;
+  var cf=document.getElementById('cuisineFilter').value;
+  renderTable(DATA.filter(function(d){return !(af&&d.area!==af)&&!(cf&&d.cuisine!==cf)&&!(kw&&!(d.name.toLowerCase().indexOf(kw)>-1||d.cuisine.indexOf(kw)>-1||d.area.indexOf(kw)>-1||d.dishes.indexOf(kw)>-1));}));
 }
 
 function exportExcel(){
-  let csv='\uFEFF排名,餐厅名称,行政区域,菜系类型,综合评分,人均消费,详细地址,推荐菜品,荣誉标签\n';
-  DATA.forEach((d,i)=>{csv+=`${i+1},"${d.name}","${d.area}","${d.cuisine}",${d.score},${d.price},"${d.address}","${d.dishes}","${d.star||''}"\n`});
-  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));a.download='天津高端餐饮指南.csv';a.click();
+  var csv='\uFEFF排名,餐厅名称,行政区域,菜系类型,综合评分,人均消费,详细地址,推荐菜品,荣誉标签\n';
+  DATA.forEach(function(d,i){csv+=(i+1)+',"'+d.name+'","'+d.area+'","'+d.cuisine+'",'+d.score+','+d.price+',"'+d.address+'","'+d.dishes+'","'+(d.star||'')+'"\n'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));a.download='天津高端餐饮指南.csv';a.click();
+}
+
+// URL hash处理：打开链接自动定位到指定餐厅
+function handleHash(){
+  var hash=location.hash;
+  if(!hash)return;
+  var m=hash.match(/^#r=(.+)/);
+  if(!m)return;
+  var rName=decodeURIComponent(m[1]);
+  var idx=DATA.findIndex(function(d){return d.name===rName});
+  if(idx===-1)return;
+  setTimeout(function(){
+    var row=document.getElementById('row-'+idx);
+    if(row){
+      row.classList.add('highlight');
+      row.scrollIntoView({behavior:'smooth',block:'center'});
+      setTimeout(function(){row.classList.remove('highlight')},2500);
+    }
+  },500);
 }
 
 // COLORS
 const COLORS=['#c8a44e','#5b7daa','#5eaa78','#d4687a','#8e6aae','#d98c3a','#3aaa95','#c95a4e','#4a90c4','#cc7a2e','#45b87a','#a84840'];
 const TT={backgroundColor:'#fff',borderColor:'#e0d8ce',textStyle:{color:'#3a3530'}};
 
-// Wait for ECharts to load before initializing charts
 function initCharts(){
-const isMobile=window.innerWidth<769;
+var isMobile=window.innerWidth<769;
 
-// AREA DONUT
-const areaCount={};DATA.forEach(d=>{areaCount[d.area]=(areaCount[d.area]||0)+1});
-const areaArr=Object.entries(areaCount).sort((a,b)=>b[1]-a[1]);
-
-const donutChart=echarts.init(document.getElementById('areaDonut'));
+// Area Donut
+var areaCount={};DATA.forEach(function(d){areaCount[d.area]=(areaCount[d.area]||0)+1});
+var areaArr=Object.entries(areaCount).sort(function(a,b){return b[1]-a[1]});
+var donutChart=echarts.init(document.getElementById('areaDonut'));
 donutChart.setOption({
   title:{text:'区域分布占比',left:'center',top:14,textStyle:{color:'#2d1f3d',fontSize:15,fontWeight:600}},
-  tooltip:{trigger:'item',formatter:'{b}: {c}家 ({d}%)',...TT},
+  tooltip:{trigger:'item',formatter:'{b}: {c}家 ({d}%)',backgroundColor:'#fff',borderColor:'#e0d8ce',textStyle:{color:'#3a3530'}},
   legend:{orient:isMobile?'horizontal':'vertical',right:isMobile?10:10,top:isMobile?'bottom':'center',textStyle:{color:'#6a6058',fontSize:11},itemWidth:10,itemHeight:10},
   series:[{type:'pie',radius:isMobile?['30%','60%']:['42%','72%'],center:isMobile?['50%','45%']:['40%','55%'],avoidLabelOverlap:true,
     itemStyle:{borderRadius:8,borderColor:'#fff',borderWidth:3},
     label:{show:!isMobile,color:'#4a4038',fontSize:11,formatter:'{b}\n{d}%'},
     emphasis:{label:{show:true,fontSize:13,fontWeight:'bold',color:'#2d1f3d'},itemStyle:{shadowBlur:10,shadowColor:'rgba(0,0,0,0.15)'}},
-    data:areaArr.map((a,i)=>({name:a[0],value:a[1],itemStyle:{color:COLORS[i%COLORS.length]}}))
+    data:areaArr.map(function(a,i){return{name:a[0],value:a[1],itemStyle:{color:COLORS[i%COLORS.length]}}})
   }]
 });
 
-// AREA BAR
-const areaBarChart=echarts.init(document.getElementById('areaBar'));
+// Area Bar
+var areaBarChart=echarts.init(document.getElementById('areaBar'));
 areaBarChart.setOption({
   title:{text:'各区域高端餐饮数量',left:'center',top:14,textStyle:{color:'#2d1f3d',fontSize:15,fontWeight:600}},
-  tooltip:{trigger:'axis',...TT},
+  tooltip:{trigger:'axis',backgroundColor:'#fff',borderColor:'#e0d8ce',textStyle:{color:'#3a3530'}},
   grid:{left:70,right:36,top:54,bottom:24},
   xAxis:{type:'value',axisLine:{lineStyle:{color:'#e0d8ce'}},axisLabel:{color:'#8a8078'},splitLine:{lineStyle:{color:'#f0ebe3'}}},
-  yAxis:{type:'category',data:areaArr.map(a=>a[0]).reverse(),axisLine:{lineStyle:{color:'#e0d8ce'}},axisLabel:{color:'#4a4038',fontSize:12}},
-  series:[{type:'bar',data:areaArr.map((a,i)=>({value:a[1],itemStyle:{color:COLORS[(areaArr.length-1-i)%COLORS.length],borderRadius:[0,6,6,0]}})).reverse(),
+  yAxis:{type:'category',data:areaArr.map(function(a){return a[0]}).reverse(),axisLine:{lineStyle:{color:'#e0d8ce'}},axisLabel:{color:'#4a4038',fontSize:12}},
+  series:[{type:'bar',data:areaArr.map(function(a,i){return{value:a[1],itemStyle:{color:COLORS[(areaArr.length-1-i)%COLORS.length],borderRadius:[0,6,6,0]}}}).reverse(),
     barWidth:isMobile?18:24,label:{show:true,position:'right',color:'#6a5a48',fontWeight:600,formatter:'{c}家'}}]
 });
 
-// CUISINE BAR
-const cuisineCount={};DATA.forEach(d=>{cuisineCount[d.cuisine]=(cuisineCount[d.cuisine]||0)+1});
-const cuisineArr=Object.entries(cuisineCount).sort((a,b)=>b[1]-a[1]);
-
-const cBarChart=echarts.init(document.getElementById('cuisineBar'));
+// Cuisine Bar
+var cuisineCount={};DATA.forEach(function(d){cuisineCount[d.cuisine]=(cuisineCount[d.cuisine]||0)+1});
+var cuisineArr=Object.entries(cuisineCount).sort(function(a,b){return b[1]-a[1]});
+var cBarChart=echarts.init(document.getElementById('cuisineBar'));
 cBarChart.setOption({
   title:{text:'各菜系餐厅数量',left:'center',top:14,textStyle:{color:'#2d1f3d',fontSize:15,fontWeight:600}},
-  tooltip:{trigger:'axis',...TT},
+  tooltip:{trigger:'axis',backgroundColor:'#fff',borderColor:'#e0d8ce',textStyle:{color:'#3a3530'}},
   grid:{left:70,right:36,top:54,bottom:24},
   xAxis:{type:'value',axisLine:{lineStyle:{color:'#e0d8ce'}},axisLabel:{color:'#8a8078'},splitLine:{lineStyle:{color:'#f0ebe3'}}},
-  yAxis:{type:'category',data:cuisineArr.map(c=>c[0]).reverse(),axisLine:{lineStyle:{color:'#e0d8ce'}},axisLabel:{color:'#4a4038',fontSize:12}},
-  series:[{type:'bar',data:cuisineArr.map((c,i)=>({value:c[1],itemStyle:{color:COLORS[(cuisineArr.length-1-i)%COLORS.length],borderRadius:[0,6,6,0]}})).reverse(),
+  yAxis:{type:'category',data:cuisineArr.map(function(c){return c[0]}).reverse(),axisLine:{lineStyle:{color:'#e0d8ce'}},axisLabel:{color:'#4a4038',fontSize:12}},
+  series:[{type:'bar',data:cuisineArr.map(function(c,i){return{value:c[1],itemStyle:{color:COLORS[(cuisineArr.length-1-i)%COLORS.length],borderRadius:[0,6,6,0]}}}).reverse(),
     barWidth:isMobile?16:20,label:{show:true,position:'right',color:'#6a5a48',fontWeight:600,formatter:'{c}家'}}]
 });
 
-// CUISINE PIE
-const cPieChart=echarts.init(document.getElementById('cuisinePie'));
+// Cuisine Pie
+var cPieChart=echarts.init(document.getElementById('cuisinePie'));
 cPieChart.setOption({
   title:{text:'菜系占比分布',left:'center',top:14,textStyle:{color:'#2d1f3d',fontSize:15,fontWeight:600}},
-  tooltip:{trigger:'item',formatter:'{b}: {c}家 ({d}%)',...TT},
+  tooltip:{trigger:'item',formatter:'{b}: {c}家 ({d}%)',backgroundColor:'#fff',borderColor:'#e0d8ce',textStyle:{color:'#3a3530'}},
   legend:{orient:isMobile?'horizontal':'vertical',right:isMobile?5:5,top:isMobile?'bottom':'center',textStyle:{color:'#6a6058',fontSize:10},itemWidth:10,itemHeight:10},
   series:[{type:'pie',radius:isMobile?['28%','55%']:['35%','65%'],center:isMobile?['50%','42%']:['38%','55%'],
     itemStyle:{borderRadius:8,borderColor:'#fff',borderWidth:3},
     label:{show:!isMobile,color:'#4a4038',fontSize:10,formatter:'{b}\n{d}%'},
     emphasis:{label:{show:true,fontSize:13,fontWeight:'bold',color:'#2d1f3d'},itemStyle:{shadowBlur:10,shadowColor:'rgba(0,0,0,0.15)'}},
-    data:cuisineArr.map((c,i)=>({name:c[0],value:c[1],itemStyle:{color:COLORS[i%COLORS.length]}}))
+    data:cuisineArr.map(function(c,i){return{name:c[0],value:c[1],itemStyle:{color:COLORS[i%COLORS.length]}}})
   }]
 });
 
-// SCORE BAR
-const scoreAreaData={};DATA.forEach(d=>{if(!scoreAreaData[d.area])scoreAreaData[d.area]={sum:0,cnt:0};scoreAreaData[d.area].sum+=d.score;scoreAreaData[d.area].cnt++});
-const scoreAreaArr=Object.entries(scoreAreaData).map(([k,v])=>({area:k,avg:+(v.sum/v.cnt).toFixed(2)})).sort((a,b)=>b.avg-a.avg);
-
-const sgChart=echarts.init(document.getElementById('scoreGroup'));
+// Score Bar
+var scoreAreaData={};DATA.forEach(function(d){if(!scoreAreaData[d.area])scoreAreaData[d.area]={sum:0,cnt:0};scoreAreaData[d.area].sum+=d.score;scoreAreaData[d.area].cnt++});
+var scoreAreaArr=Object.entries(scoreAreaData).map(function(e){return{area:e[0],avg:+(e[1].sum/e[1].cnt).toFixed(2)}}).sort(function(a,b){return b.avg-a.avg});
+var sgChart=echarts.init(document.getElementById('scoreGroup'));
 sgChart.setOption({
   title:{text:'各区域平均评分对比',left:'center',top:14,textStyle:{color:'#2d1f3d',fontSize:15,fontWeight:600}},
-  tooltip:{trigger:'axis',...TT},
+  tooltip:{trigger:'axis',backgroundColor:'#fff',borderColor:'#e0d8ce',textStyle:{color:'#3a3530'}},
   grid:{left:50,right:16,top:54,bottom:isMobile?60:70},
-  xAxis:{type:'category',data:scoreAreaArr.map(s=>s.area),axisLine:{lineStyle:{color:'#e0d8ce'}},axisLabel:{color:'#4a4038',rotate:30,fontSize:11}},
+  xAxis:{type:'category',data:scoreAreaArr.map(function(s){return s.area}),axisLine:{lineStyle:{color:'#e0d8ce'}},axisLabel:{color:'#4a4038',rotate:30,fontSize:11}},
   yAxis:{type:'value',min:4.0,max:5.0,axisLine:{lineStyle:{color:'#e0d8ce'}},axisLabel:{color:'#8a8078'},splitLine:{lineStyle:{color:'#f0ebe3'}}},
-  series:[{type:'bar',data:scoreAreaArr.map(s=>s.avg),barWidth:isMobile?20:28,itemStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'#c8a44e'},{offset:1,color:'#8b6914'}]),borderRadius:[6,6,0,0]},
+  series:[{type:'bar',data:scoreAreaArr.map(function(s){return s.avg}),barWidth:isMobile?20:28,itemStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'#c8a44e'},{offset:1,color:'#8b6914'}]),borderRadius:[6,6,0,0]},
     markLine:{data:[{yAxis:4.8,lineStyle:{color:'#16a34a',type:'dashed',width:2},label:{formatter:'优质线 4.8',color:'#16a34a',fontSize:11}}]}}]
 });
 
 // TOP10
-const top10=DATA.slice(0,10);
-const heatChart=echarts.init(document.getElementById('scoreHeat'));
+var top10=DATA.slice(0,10);
+var heatChart=echarts.init(document.getElementById('scoreHeat'));
 heatChart.setOption({
   title:{text:'TOP10 高分餐厅评分',left:'center',top:14,textStyle:{color:'#2d1f3d',fontSize:15,fontWeight:600}},
-  tooltip:{trigger:'axis',...TT,formatter:function(p){return p[0].name+'<br/>评分: '+p[0].value+'分'}},
+  tooltip:{trigger:'axis',backgroundColor:'#fff',borderColor:'#e0d8ce',textStyle:{color:'#3a3530'},formatter:function(p){return p[0].name+'<br/>评分: '+p[0].value+'分'}},
   grid:{left:isMobile?100:150,right:40,top:40,bottom:24},
   xAxis:{type:'value',min:4.0,max:5.1,axisLine:{lineStyle:{color:'#e0d8ce'}},axisLabel:{color:'#8a8078'},splitLine:{lineStyle:{color:'#f0ebe3'}}},
-  yAxis:{type:'category',data:top10.map(d=>d.name).reverse(),axisLine:{lineStyle:{color:'#e0d8ce'}},axisLabel:{color:'#4a4038',fontSize:isMobile?9:11}},
-  series:[{type:'bar',data:top10.map(d=>{const h=d.score>=4.8;return{value:d.score,itemStyle:{color:h?new echarts.graphic.LinearGradient(0,0,1,0,[{offset:0,color:'#16a34a'},{offset:1,color:'#4ade80'}]):new echarts.graphic.LinearGradient(0,0,1,0,[{offset:0,color:'#8b6914'},{offset:1,color:'#c8a44e'}]),borderRadius:[0,6,6,0]}}}).reverse(),
+  yAxis:{type:'category',data:top10.map(function(d){return d.name}).reverse(),axisLine:{lineStyle:{color:'#e0d8ce'}},axisLabel:{color:'#4a4038',fontSize:isMobile?9:11}},
+  series:[{type:'bar',data:top10.map(function(d){var h=d.score>=4.8;return{value:d.score,itemStyle:{color:h?new echarts.graphic.LinearGradient(0,0,1,0,[{offset:0,color:'#16a34a'},{offset:1,color:'#4ade80'}]):new echarts.graphic.LinearGradient(0,0,1,0,[{offset:0,color:'#8b6914'},{offset:1,color:'#c8a44e'}]),borderRadius:[0,6,6,0]}}}).reverse(),
     barWidth:isMobile?14:20,
     label:{show:true,position:'right',fontWeight:600,formatter:'{c}分',color:'#4a4038',fontSize:isMobile?10:12}
   }]
 });
 
-// RESIZE
-const charts=[donutChart,areaBarChart,cBarChart,cPieChart,sgChart,heatChart];
-let resizeTimer;
-window.addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>{charts.forEach(c=>c.resize())},200)});
+var charts=[donutChart,areaBarChart,cBarChart,cPieChart,sgChart,heatChart];
+var resizeTimer;
+window.addEventListener('resize',function(){clearTimeout(resizeTimer);resizeTimer=setTimeout(function(){charts.forEach(function(c){c.resize()})},200)});
 }
 
-// Initialize charts when ECharts is ready
 if(typeof echarts!=='undefined'){initCharts();}
 else{window.addEventListener('echarts-ready',initCharts);}
-</script>
+
+// 处理URL hash定位
+window.addEventListener('load',handleHash);
+window.addEventListener('hashchange',handleHash);
+document.addEventListener('DOMContentLoaded',handleHash);</script>
 </body>
 </html>
